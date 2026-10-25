@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build (must already exist)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify
+        run: |
+          npm run lint
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: Lint the Firefox bundle
+        run: npx web-ext lint --source-dir dist/firefox
+
+      - name: Package bundles
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          cd dist
+          for browser in chrome firefox; do
+            (cd "$browser" && zip -qr "../v2ray-browser-$browser-$TAG.zip" .)
+          done
+          ls -lh ./*.zip
+
+      - name: Checksums
+        run: cd dist && sha256sum *.zip > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          gh release create "$TAG" \
+            dist/v2ray-browser-chrome-*.zip \
+            dist/v2ray-browser-firefox-*.zip \
+            dist/SHA256SUMS.txt \
+            --title "V2Ray Browser $TAG" \
+            --notes-file CHANGELOG.md \
+            --verify-tag
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundles
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30

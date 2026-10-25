@@ -6,7 +6,7 @@
   "license": "GPL-3.0-only",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.19.0"
   },
   "workspaces": [
     "packages/*",
