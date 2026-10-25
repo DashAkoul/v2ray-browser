@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "useDefineForClassFields": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "allowJs": false,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@v2rb/shared": ["packages/shared-types/src/index.ts"],
+      "@v2rb/parser": ["packages/config-parser/src/index.ts"],
+      "@v2rb/storage": ["packages/storage/src/index.ts"],
+      "@v2rb/adapters": ["packages/browser-adapters/src/index.ts"],
+      "@v2rb/core": ["packages/core/src/index.ts"],
+      "@v2rb/ui": ["packages/ui/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*",
+    "packages/*/tests/**/*",
+    "apps/**/*",
+    "tests/**/*",
+    "scripts/*.ts",
+    "*.config.ts"
+  ],
+  "exclude": ["node_modules", "dist", "coverage", "playwright-report", "test-results"]
+}
